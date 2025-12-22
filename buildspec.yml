@@ -11,7 +11,8 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 045998146012.dkr.ecr.us-east-1.amazonaws.com
+      - aws ecr get-login-password --region us-east-1 |
+        docker login --username AWS --password-stdin 045998146012.dkr.ecr.us-east-1.amazonaws.com
 
       - echo Configuring kubeconfig
       - aws eks update-kubeconfig --region us-east-1 --name brain-cluster
@@ -20,12 +21,13 @@ phases:
     commands:
       - echo Building Docker image
       - docker build -t brain-tasks-app .
-      - docker tag brain-tasks-app:latest \ 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app
+      - docker tag brain-tasks-app:latest \
+        045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:latest
 
   post_build:
     commands:
       - echo Pushing image to ECR
-      - docker push 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app
+      - docker push 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:latest
 
       - echo Deploying to EKS
       - kubectl apply -f deployment.yaml
