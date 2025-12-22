@@ -10,6 +10,9 @@ phases:
 
   pre_build:
     commands:
+      - echo "Move to source directory"
+      - cd $CODEBUILD_SRC_DIR
+
       - echo "Checking AWS identity"
       - aws sts get-caller-identity
 
@@ -22,20 +25,24 @@ phases:
 
   build:
     commands:
+      - echo "Current directory"
+      - pwd
+      - ls -la
+
       - echo "Building Docker image"
       - docker build -t brain-tasks-app .
 
-      - echo "Listing Docker images"
+      - echo "Docker images after build"
       - docker images
 
-      - echo "Tagging Docker image for ECR"
+      - echo "Tagging Docker image"
       - docker tag brain-tasks-app:latest 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:latest
 
   post_build:
     commands:
-      - echo "Pushing image to Amazon ECR"
+      - echo "Pushing image to ECR"
       - docker push 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:latest
 
-      - echo "Deploying application to EKS"
-      - kubectl apply -f deployment.yaml
-      - kubectl apply -f service.yaml
+      - echo "Deploying to EKS"
+      - kubectl apply -f Deployment.yaml
+      - kubectl apply -f Service.yaml
