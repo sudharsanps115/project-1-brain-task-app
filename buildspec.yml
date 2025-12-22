@@ -10,7 +10,8 @@ phases:
 
   pre_build:
     commands:
-      - echo "Move to source directory"
+      - echo "Source directory:"
+      - echo $CODEBUILD_SRC_DIR
       - cd $CODEBUILD_SRC_DIR
 
       - echo "Checking AWS identity"
@@ -29,8 +30,8 @@ phases:
       - pwd
       - ls -la
 
-      - echo "Building Docker image"
-      - docker build -t brain-tasks-app .
+      - echo "Building Docker image using absolute path"
+      - docker build -t brain-tasks-app $CODEBUILD_SRC_DIR
 
       - echo "Docker images after build"
       - docker images
