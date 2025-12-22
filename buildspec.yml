@@ -4,17 +4,36 @@ env:
   variables:
     AWS_REGION: us-east-1
     ECR_REPO: 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app
+    EKS_CLUSTER: brain-cluster
 
 phases:
+  install:
+    commands:
+      - echo Installing kubectl
+      - curl -LO https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl
+      - chmod +x kubectl
+      - mv kubectl /usr/local/bin/
+
   pre_build:
     commands:
-    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
+      - echo Logging in to Amazon ECR
+      - aws ecr get-login-password --region $AWS_REGION |
+        docker login --username AWS --password-stdin $ECR_REPO
+
+      - echo Configuring kubeconfig
+      - aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
 
   build:
     commands:
-      - docker build -t brain-task-app .
-      - docker tag brain-task-app:latest $ECR_REPO:latest
+      - echo Building Docker image
+      - docker build -t brain-tasks-app .
+      - docker tag brain-tasks-app:latest $ECR_REPO:latest
 
   post_build:
     commands:
+      - echo Pushing image to ECR
       - docker push $ECR_REPO:latest
+
+      - echo Deploying to EKS
+      - kubectl apply -f deployment.yaml
+      - kubectl apply -f service.yaml
