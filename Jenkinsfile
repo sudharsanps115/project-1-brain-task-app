@@ -9,12 +9,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/sudharsanps115/project-1-brain-task-app.git'
-            }
-        }
-
         stage('Docker Build') {
             steps {
                 sh '''
