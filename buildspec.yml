@@ -1,49 +1,21 @@
 version: 0.2
 
 phases:
-  install:
-    commands:
-      - echo "Installing kubectl"
-      - curl -LO https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl
-      - chmod +x kubectl
-      - mv kubectl /usr/local/bin/
-
   pre_build:
     commands:
-      - echo "Source directory:"
-      - echo $CODEBUILD_SRC_DIR
-      - cd $CODEBUILD_SRC_DIR
-
-      - echo "Checking AWS identity"
-      - aws sts get-caller-identity
-
       - echo "Logging in to Amazon ECR"
       - aws ecr get-login-password --region us-east-1 |
         docker login --username AWS --password-stdin 045998146012.dkr.ecr.us-east-1.amazonaws.com
 
-      - echo "Updating kubeconfig for EKS"
-      - aws eks update-kubeconfig --region us-east-1 --name brain-cluster
-
   build:
     commands:
-      - echo "Current directory"
-      - pwd
-      - ls -la
-
-      - echo "Building Docker image using absolute path"
-      - docker build -t brain-tasks-app $CODEBUILD_SRC_DIR
-
-      - echo "Docker images after build"
-      - docker images
+      - echo "Building Docker image"
+      - docker build -t brain-tasks-app .
 
       - echo "Tagging Docker image"
       - docker tag brain-tasks-app:latest 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:latest
 
   post_build:
     commands:
-      - echo "Pushing image to ECR"
+      - echo "Pushing Docker image to Amazon ECR"
       - docker push 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:latest
-
-      - echo "Deploying to EKS"
-      - kubectl apply -f Deployment.yaml
-      - kubectl apply -f Service.yaml
