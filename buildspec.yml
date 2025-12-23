@@ -1,20 +1,49 @@
 version: 0.2
 
-env:
-  variables:
-    AWS_REGION: us-east-1
-    ECR_REPO: 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app
-
 phases:
+  install:
+    commands:
+      - echo "Installing kubectl"
+      - curl -LO https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl
+      - chmod +x kubectl
+      - mv kubectl /usr/local/bin/
+
   pre_build:
     commands:
-    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
+      - echo "Source directory:"
+      - echo $CODEBUILD_SRC_DIR
+      - cd $CODEBUILD_SRC_DIR
+
+      - echo "Checking AWS identity"
+      - aws sts get-caller-identity
+
+      - echo "Logging in to Amazon ECR"
+      - aws ecr get-login-password --region us-east-1 |
+        docker login --username AWS --password-stdin 045998146012.dkr.ecr.us-east-1.amazonaws.com
+
+      - echo "Updating kubeconfig for EKS"
+      - aws eks update-kubeconfig --region us-east-1 --name brain-cluster
 
   build:
     commands:
-      - docker build -t brain-task-app .
-      - docker tag brain-task-app:latest $ECR_REPO:latest
+      - echo "Current directory"
+      - pwd
+      - ls -la
+
+      - echo "Building Docker image using absolute path"
+      - docker build -t brain-tasks-app $CODEBUILD_SRC_DIR
+
+      - echo "Docker images after build"
+      - docker images
+
+      - echo "Tagging Docker image"
+      - docker tag brain-tasks-app:latest 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:latest
 
   post_build:
     commands:
-      - docker push $ECR_REPO:latest
+      - echo "Pushing image to ECR"
+      - docker push 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:latest
+
+      - echo "Deploying to EKS"
+      - kubectl apply -f Deployment.yaml
+      - kubectl apply -f Service.yaml
