@@ -21,9 +21,7 @@ phases:
       - aws sts get-caller-identity
 
       - echo "Logging in to Amazon ECR"
-      - aws ecr get-login-password --region $AWS_REGION |
-        docker login --username AWS --password-stdin \
-        $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
       - echo "Updating kubeconfig for EKS"
       - aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
@@ -34,14 +32,12 @@ phases:
       - docker build -t $IMAGE_NAME .
 
       - echo "Tagging Docker image"
-      - docker tag $IMAGE_NAME:latest \
-        $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest
+      - docker tag $IMAGE_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest
 
   post_build:
     commands:
       - echo "Pushing image to ECR"
-      - docker push \
-        $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest
 
       - echo "Deploying to EKS"
       - kubectl apply -f Deployment.yaml
