@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = "ap-south-1"
-        ECR_REPO = "<ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app"
+        AWS_REGION = "us-east-1"
+        ECR_REPO = "045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app"
         IMAGE_TAG = "latest"
     }
 
