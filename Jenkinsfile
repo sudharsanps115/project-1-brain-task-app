@@ -62,7 +62,7 @@ pipeline {
                     sh '''
                     echo "Updating kubeconfig..."
                     aws eks update-kubeconfig \
-                      --name brain-cluster \
+                      --name brain-cluster1 \
                       --region $AWS_REGION
 
                     echo "Deploying application to EKS..."
