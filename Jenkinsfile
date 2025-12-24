@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         AWS_REGION = "us-east-1"
-        ECR_REPO  = "045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app"
-        IMAGE_TAG = "latest"
+        ECR_REPO   = "045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app"
+        IMAGE_TAG  = "latest"
     }
 
     stages {
@@ -16,8 +16,8 @@ pipeline {
                      credentialsId: 'aws-eks-creds']
                 ]) {
                     sh '''
-                    echo "Verifying AWS credentials..."
-                    aws sts get-caller-identity
+                        echo "Verifying AWS credentials..."
+                        aws sts get-caller-identity
                     '''
                 }
             }
@@ -26,11 +26,11 @@ pipeline {
         stage('Docker Build & Tag') {
             steps {
                 sh '''
-                echo "Building Docker image..."
-                docker build -t brain-tasks-app .
+                    echo "Building Docker image..."
+                    docker build -t brain-tasks-app .
 
-                echo "Tagging image for ECR..."
-                docker tag brain-tasks-app:latest $ECR_REPO:$IMAGE_TAG
+                    echo "Tagging image for ECR..."
+                    docker tag brain-tasks-app:latest $ECR_REPO:$IMAGE_TAG
                 '''
             }
         }
@@ -42,47 +42,44 @@ pipeline {
                      credentialsId: 'aws-eks-creds']
                 ]) {
                     sh '''
-                    echo "Logging in to ECR..."
-                    aws ecr get-login-password --region $AWS_REGION \
-                      | docker login --username AWS --password-stdin $ECR_REPO
+                        echo "Logging in to ECR..."
+                        aws ecr get-login-password --region $AWS_REGION \
+                          | docker login --username AWS --password-stdin $ECR_REPO
 
-                    echo "Pushing image to ECR..."
-                    docker push $ECR_REPO:$IMAGE_TAG
+                        echo "Pushing image to ECR..."
+                        docker push $ECR_REPO:$IMAGE_TAG
                     '''
                 }
             }
         }
 
         stage('Deploy to EKS') {
-    steps {
-        withCredentials([
-            [$class: 'AmazonWebServicesCredentialsBinding',
-             credentialsId: 'aws-eks-creds']
-        ]) {
-            sh '''
-            echo "Updating kubeconfig..."
-            aws eks update-kubeconfig \
-              --name brain-cluster1 \
-              --region us-east-1
+            steps {
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding',
+                     credentialsId: 'aws-eks-creds']
+                ]) {
+                    sh '''
+                        echo "Updating kubeconfig..."
+                        aws eks update-kubeconfig \
+                          --name brain-cluster1 \
+                          --region $AWS_REGION
 
-            echo "DEBUG: workspace structure"
-            pwd
-            ls -l
-            find . -name "*Deployment*.yaml"
-
-            echo "Deploying application to EKS..."
-            kubectl apply -f <PATH_FROM_FIND_OUTPUT>
-            kubectl apply -f <SERVICE_PATH_FROM_FIND_OUTPUT>
-            '''
+                        echo "Deploying application to EKS..."
+                        kubectl apply -f Deployment.yaml
+                        kubectl apply -f Service.yaml
+                    '''
+                }
+            }
         }
     }
-}
+
     post {
         success {
-            echo " CI/CD Pipeline completed successfully!"
+            echo "CI/CD Pipeline completed successfully!"
         }
         failure {
-            echo " CI/CD Pipeline failed. Check logs above."
+            echo "CI/CD Pipeline failed. Check logs above."
         }
     }
 }
