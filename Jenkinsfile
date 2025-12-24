@@ -39,7 +39,7 @@ pipeline {
             steps {
                 withCredentials([
                     [$class: 'AmazonWebServicesCredentialsBinding',
-                     credentialsId: 'aws-eks-creds']
+                     credentialsId: 'aws']
                 ]) {
                     sh '''
                         echo "Logging in to ECR..."
@@ -57,7 +57,7 @@ pipeline {
             steps {
                 withCredentials([
                     [$class: 'AmazonWebServicesCredentialsBinding',
-                     credentialsId: 'aws-eks-creds']
+                     credentialsId: 'aws']
                 ]) {
                     sh '''
                         echo "Updating kubeconfig..."
