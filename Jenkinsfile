@@ -13,7 +13,7 @@ pipeline {
             steps {
                 withCredentials([
                     [$class: 'AmazonWebServicesCredentialsBinding',
-                     credentialsId: 'aws-eks-creds']
+                     credentialsId: 'aws']
                 ]) {
                     sh '''
                         echo "Verifying AWS credentials..."
