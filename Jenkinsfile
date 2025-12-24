@@ -66,8 +66,9 @@ pipeline {
                       --region $AWS_REGION
 
                     echo "Deploying application to EKS..."
-                    kubectl apply -f project-1/Brain-Tasks-App/Deployment.yaml
-                    kubectl apply -f project-1/Brain-Tasks-App/Service.yaml
+                    kubectl apply -f Brain-Tasks-App/Deployment.yaml
+                    kubectl apply -f Brain-Tasks-App/Service.yaml
+
 
                     '''
                 }
