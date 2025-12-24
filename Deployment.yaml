@@ -16,7 +16,7 @@ spec:
       - name: ecr-secret
       containers:
       - name: brain-task-app
-        image: 045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:latest
+        image: 045998146012.dkr.ecr.ap-south-1.amazonaws.com/brain-task-app:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
