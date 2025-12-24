@@ -54,28 +54,29 @@ pipeline {
         }
 
         stage('Deploy to EKS') {
-            steps {
-                withCredentials([
-                    [$class: 'AmazonWebServicesCredentialsBinding',
-                     credentialsId: 'aws-eks-creds']
-                ]) {
-                    sh '''
-                    echo "Updating kubeconfig..."
-                    aws eks update-kubeconfig \
-                      --name brain-cluster1 \
-                      --region $AWS_REGION
+    steps {
+        withCredentials([
+            [$class: 'AmazonWebServicesCredentialsBinding',
+             credentialsId: 'aws-eks-creds']
+        ]) {
+            sh '''
+            echo "Updating kubeconfig..."
+            aws eks update-kubeconfig \
+              --name brain-cluster1 \
+              --region us-east-1
 
-                    echo "Deploying application to EKS..."
-                    kubectl apply -f Brain-Tasks-App/Deployment.yaml
-                    kubectl apply -f Brain-Tasks-App/Service.yaml
+            echo "DEBUG: workspace structure"
+            pwd
+            ls -l
+            find . -name "*Deployment*.yaml"
 
-
-                    '''
-                }
-            }
+            echo "Deploying application to EKS..."
+            kubectl apply -f <PATH_FROM_FIND_OUTPUT>
+            kubectl apply -f <SERVICE_PATH_FROM_FIND_OUTPUT>
+            '''
         }
     }
-
+}
     post {
         success {
             echo " CI/CD Pipeline completed successfully!"
