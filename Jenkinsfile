@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = "us-east-1"
-        ECR_REPO   = "045998146012.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app"
+        AWS_REGION = "ap-south-1"
+        ECR_REPO   = "045998146012.dkr.ecr.ap-south-1.amazonaws.com/brain-task-app"
         IMAGE_TAG  = "latest"
     }
 
@@ -62,7 +62,7 @@ pipeline {
                     sh '''
                         echo "Updating kubeconfig..."
                         aws eks update-kubeconfig \
-                          --name brain-cluster1 \
+                          --name brain-cluster \
                           --region $AWS_REGION
 
                         echo "Deploying application to EKS..."
